@@ -719,13 +719,14 @@ const db = getDatabase(app);
 function saveToCloud() {
   set(ref(db, 'data'), {
     students: students,
-    photos: photos
+    photos: photos,
+    attendance: attendance
   });
 }
 
 // 云读取
 function loadFromCloud(callback) {
-  onValue(ref(db, 'students'), (snapshot) => {
+  onValue(ref(db, 'data'), (snapshot) => {
     const data = snapshot.val();
     if (data) callback(data);
   });
@@ -739,11 +740,17 @@ save = function() {
 };
 
 // 页面加载同步
+
 loadFromCloud((cloudData)=>{
+  if (!cloudData) return;
+
   students = cloudData.students || [];
   photos = cloudData.photos || {};
+  attendance = cloudData.attendance || {};
+
   renderStudents();
 });
+
 </script>
 </body>
 </html>
