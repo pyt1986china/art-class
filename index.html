@@ -301,7 +301,8 @@ let SUNDAYS_CURRENT_YEAR = getSundaysForYear(2026);
 let SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_CURRENT_YEAR);
 
 // ── Storage ────────────────────────────────────
-const BASE_KEY = 'artclass_v4'; // 版本升级，支持多年份
+const BASE_KEY = 'artclass_v4'; // 新版本（支持多年份）
+const OLD_KEY_2026 = 'artclass2026_v3'; // 旧版本（2026年）
 const PHOTO_KEY = 'artclass_photos';
 let students = [], attendance = {}, photos = {}; // photos[sid] = base64 dataURL
 let editingId = null, currentTab = 'students', activeFilter = 'all';
@@ -313,14 +314,28 @@ function getStorageKey(year) {
 function load(year = currentYear) {
   try {
     const key = getStorageKey(year);
-    const d = JSON.parse(localStorage.getItem(key)||'{}');
+    let d = JSON.parse(localStorage.getItem(key)||'{}');
+    
+    // 如果是2026年且新存储为空，尝试从旧存储迁移
+    if (year === 2026 && (!d.students || d.students.length === 0)) {
+      const oldData = JSON.parse(localStorage.getItem(OLD_KEY_2026)||'{}');
+      if (oldData.students && oldData.students.length > 0) {
+        d = oldData;
+        console.log('✅ 从旧版本迁移了', oldData.students.length, '个学生');
+        showToast(`✅ 恢复了 ${oldData.students.length} 个学生的数据`);
+      }
+    }
+    
     students = d.students || [];
     const raw = d.attendance || {};
     attendance = {};
     for (const sid in raw) attendance[sid] = new Set(raw[sid]);
     try { photos = JSON.parse(localStorage.getItem(PHOTO_KEY)||'{}'); } catch(e){ photos={}; }
     if (!students.length) seed();
-  } catch(e) { seed(); }
+  } catch(e) { 
+    console.error('加载数据出错:', e);
+    seed(); 
+  }
 }
 
 function save(year = currentYear) {
