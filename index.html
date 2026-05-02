@@ -28,9 +28,9 @@ html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg)
 
 /* Header */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px 0;flex-shrink:0;}
-.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;}
 .header-top h1{font-size:19px;font-weight:700;color:var(--text);}
-.add-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.add-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .tabs{display:flex;gap:4px;border-bottom:none;}
 .tab{padding:8px 14px;border-radius:999px 999px 0 0;font-size:13px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all 0.15s;border-bottom:2px solid transparent;}
 .tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
@@ -53,8 +53,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .student-card{background:var(--surface);border-radius:var(--radius);margin:8px 0;box-shadow:var(--shadow);overflow:hidden;}
 .card-header{display:flex;align-items:center;gap:11px;padding:13px 14px 10px;}
 .avatar-wrap{position:relative;flex-shrink:0;width:46px;height:46px;}
-.avatar{width:46px;height:46px;border-radius:50%;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;object-fit:cover;cursor:pointer;border:2px solid rgba(255,255,255,0.6);}
-.avatar-cam{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1.5px solid var(--surface);cursor:pointer;pointer-events:none;}
+.avatar{width:46px;height:46px;border-radius:50%;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;object-fit:cover;cursor:pointer;border:2px solid rgba(0,0,0,0.1);}
+.avatar-cam{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1.5px solid #fff;}
 .photo-input{display:none;}
 .card-info{flex:1;min-width:0;}
 .card-name{font-size:15px;font-weight:700;}
@@ -78,7 +78,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .cal-month-group{margin-bottom:12px;}
 .cal-month-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;}
 .cal-days{display:flex;flex-wrap:wrap;gap:6px;}
-.cal-day{width:38px;height:38px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);transition:all 0.15s;flex-shrink:0;position:relative;}
+.cal-day{width:38px;height:38px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);position:relative;}
 .cal-day:active{transform:scale(0.92);}
 .cal-day .day-num{font-size:11px;font-weight:600;color:var(--text2);line-height:1;}
 .cal-day .day-mon{font-size:9px;color:var(--text3);line-height:1;margin-top:1px;}
@@ -115,8 +115,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .sheet h2{font-size:17px;font-weight:700;margin-bottom:16px;}
 .form-group{margin-bottom:14px;}
 .form-group label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:5px;}
-.form-group input,.form-group select{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:15px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;}
-.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.form-group input,.form-group select{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:15px;font-family:inherit;color:var(--text);background:var(--surface);}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);outline:none;}
 .form-row{display:flex;gap:10px;}
 .form-row .form-group{flex:1;}
 .sheet-actions{display:flex;gap:8px;margin-top:18px;}
@@ -128,12 +128,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .btn-danger{background:var(--red-bg);color:var(--red);width:100%;padding:11px;font-size:14px;border-radius:var(--radius-sm);margin-top:6px;font-family:inherit;}
 
 /* Toast */
-.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:rgba(28,26,24,0.92);color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:rgba(28,26,24,0.92);color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;}
 
 /* Bottom nav */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:100;}
-.nav-btn{flex:1;padding:10px 0 7px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-family:inherit;}
+.nav-btn{flex:1;padding:10px 0 7px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-family:inherit;transition:color 0.15s;}
 .nav-btn.active{color:var(--accent);}
 .nav-icon{font-size:21px;line-height:1;}
 
@@ -153,21 +153,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .export-btn{width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:inherit;margin-bottom:8px;}
 .section-title{font-size:11px;font-weight:600;color:var(--text3);padding:12px 4px 5px;letter-spacing:0.5px;}
 
-  .header-banner {
+/* Header Banner - 合并 CSS，移除重复 */
+.header-banner {
   position: relative;
+  width: 100%;
   border-radius: 14px;
   overflow: hidden;
   margin-bottom: 10px;
-}
-
-.header-banner {
-  width: 100%;
-  overflow: hidden;
+  flex: 1;
 }
 
 .header-banner img {
   width: 100%;
-  height: 20vh; /* 根据屏幕高度 */
+  height: 20vh;
   object-fit: cover;
 }
 
@@ -188,9 +186,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
   <header>
     <div class="header-top">
       <div class="header-banner">
-       <img src="https://picsum.photos/800/200">
-       <div class="header-title">🎨 美术班出勤 2026</div>
-    </div>
+        <img src="https://picsum.photos/800/200" alt="banner">
+        <div class="header-title">🎨 美术班出勤 2026</div>
+      </div>
       <button class="add-btn" onclick="openAddModal()">＋</button>
     </div>
     <div class="tabs">
@@ -367,17 +365,17 @@ function handlePhoto(event, sid) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    // Compress image before saving
+    // Compress image before saving (更激进的压缩 - 120x120 + quality 0.6)
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const max = 200;
+      const max = 120;
       let w = img.width, h = img.height;
       if (w > h) { if (w > max) { h = h*(max/w); w = max; } }
       else { if (h > max) { w = w*(max/h); h = max; } }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      photos[sid] = canvas.toDataURL('image/jpeg', 0.75);
+      photos[sid] = canvas.toDataURL('image/jpeg', 0.6);
       savePhotos();
       renderStudents();
       showToast('✅ 头像已更新');
@@ -644,7 +642,13 @@ function openAddModal() {
   document.getElementById('fNote').value='';
   document.getElementById('deleteRow').style.display='none';
   document.getElementById('modal').classList.add('open');
-  setTimeout(()=>document.getElementById('fName').focus(), 300);
+  // 改进的焦点管理
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const nameInput = document.getElementById('fName');
+      if (nameInput) nameInput.focus();
+    }, 0);
+  });
 }
 
 function openEditModal(id) {
@@ -668,15 +672,22 @@ function closeModal() {
 
 function saveStudent() {
   const name = document.getElementById('fName').value.trim();
-  const total = parseInt(document.getElementById('fTotal').value);
+  const totalVal = document.getElementById('fTotal').value.trim();
+  const total = parseInt(totalVal);
   const attended = parseInt(document.getElementById('fAttended').value)||0;
   const paid = document.getElementById('fPaid').value;
   const note = document.getElementById('fNote').value.trim();
+  
+  // 改进的输入验证
   if (!name) { showToast('请填写学生姓名'); return; }
-  if (!total||total<1) { showToast('请填写有效课时数'); return; }
+  if (!totalVal || isNaN(total) || total < 1) { 
+    showToast('请填写有效课时数'); 
+    return; 
+  }
+  
   if (editingId) {
     const s = students.find(x=>x.id===editingId);
-    Object.assign(s, {name, total, attended, paid, note});
+    if (s) Object.assign(s, {name, total, attended, paid, note});
   } else {
     const id = Date.now();
     students.push({id, name, total, attended, paid, note});
@@ -709,7 +720,9 @@ function showToast(msg) {
 // ── Init ───────────────────────────────────────
 load(); renderStats(); renderStudents();
 </script>
-  <script type="module">
+
+<!-- Firebase 云同步脚本 -->
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -720,40 +733,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 云保存
+// 云保存 - 正确序列化 Set 为数组
 function saveToCloud() {
+  const att = {};
+  for (const sid in attendance) {
+    att[sid] = [...attendance[sid]];
+  }
   set(ref(db, 'data'), {
     students: students,
     photos: photos,
-    attendance: attendance
-  });
+    attendance: att
+  }).catch(err => console.error('Cloud save error:', err));
 }
 
-// 云读取
+// 云读取 - 正确反序列化数组为 Set
 function loadFromCloud(callback) {
   onValue(ref(db, 'data'), (snapshot) => {
     const data = snapshot.val();
     if (data) callback(data);
-  });
+  }, err => console.error('Cloud load error:', err));
 }
 
 // 替换原保存
 const originalSave = save;
-save = function() {
+window.save = function() {
   originalSave();
   saveToCloud();
 };
 
-// 页面加载同步
-
-loadFromCloud((cloudData)=>{
+// 页面加载时同步云端数据
+loadFromCloud((cloudData) => {
   if (!cloudData) return;
 
   students = cloudData.students || [];
   photos = cloudData.photos || {};
-  attendance = cloudData.attendance || {};
+  
+  // 关键修复：正确转换 attendance 从数组回 Set
+  const raw = cloudData.attendance || {};
+  attendance = {};
+  for (const sid in raw) {
+    attendance[sid] = new Set(raw[sid]);
+  }
 
   renderStudents();
+  renderStats();
 });
 
 </script>
