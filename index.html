@@ -269,12 +269,54 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
   
 <script>
 
+function getSundays(year) {
+  const sundays = [];
+  const d = new Date(year, 0, 1);
+
+  while (d.getDay() !== 0) {
+    d.setDate(d.getDate() + 1);
+  }
+
+  while (d.getFullYear() === year) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    sundays.push(`${y}-${m}-${day}`);
+    d.setDate(d.getDate() + 7);
+  }
+
+  return sundays;
+}
+
+function getSundaysByMonth(year) {
+  return groupByMonth(getSundays(year));
+}
+
+  
 let currentYear = new Date().getFullYear();
   
 function renderAll() {
   renderStats();
   renderStudents();
 }
+
+let currentYear = new Date().getFullYear();
+
+function changeYear(delta) {
+  currentYear += delta;
+
+  // 更新年份显示
+  document.getElementById('yearLabel').textContent = currentYear;
+
+  // 更新标题
+  document.querySelector('.header-title').textContent =
+    `🎨 美术班出勤 ${currentYear}`;
+
+  // 重新渲染页面
+  renderAll();
+}
+
+
   
 // ── 2026年所有周日 ──────────────────────────────
 
@@ -508,8 +550,9 @@ function renderStudents() {
 
     // Show only current month's sundays in card preview, rest collapsed
     const nowMonth = todayStr.slice(0,7);
-    const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || [];
 
+    const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || [];
+    
     const dayCells = monthSundays.map(d => {
       const isAtt = att.has(d);
       const isToday = d === todayStr;
