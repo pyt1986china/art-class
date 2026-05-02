@@ -23,7 +23,7 @@
   --shadow:0 2px 12px rgba(0,0,0,0.07);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:auto;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 
 /* Header */
@@ -315,7 +315,10 @@ function seed() {
 }
 
 // ── Helpers ────────────────────────────────────
-function today() { return new Date().toISOString().slice(0,10); }
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 function getAtt(sid) { return attendance[sid] || new Set(); }
 
@@ -405,7 +408,7 @@ function renderStats() {
 // ── Student Tab ────────────────────────────────
 function renderStudents() {
   const q = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
-  let list = students.filter(s => !q || s.name.includes(q));
+  let list = students.filter(s => !q || s.name.toLowerCase().includes(q));
   if (activeFilter==='low') list = list.filter(s => { const r=remain(s); return r>0&&r<=3; });
   if (activeFilter==='unpaid') list = list.filter(s => s.paid==='unpaid');
   const todayStr = today();
@@ -678,7 +681,7 @@ function saveStudent() {
     const s = students.find(x=>x.id===editingId);
     Object.assign(s, {name, total, attended, paid, note});
   } else {
-    const id = Date.now();
+    const id = crypto.randomUUID();
     students.push({id, name, total, attended, paid, note});
     attendance[id] = new Set();
   }
@@ -709,7 +712,7 @@ function showToast(msg) {
 // ── Init ───────────────────────────────────────
 load(); renderStats(); renderStudents();
 </script>
-  <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -720,42 +723,76 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 云保存
+// ✅ 防循环锁
+let isSyncing = false;
+
+// ✅ 时间戳（防覆盖）
+let lastUpdate = 0;
+
+// ✅ Set → Array（存云）
+function serializeAttendance() {
+  const result = {};
+  for (const sid in attendance) {
+    result[sid] = [...attendance[sid]];
+  }
+  return result;
+}
+
+// ✅ Array → Set（读云）
+function deserializeAttendance(raw) {
+  const result = {};
+  for (const sid in raw) {
+    result[sid] = new Set(raw[sid]);
+  }
+  return result;
+}
+
+// ✅ 云保存
 function saveToCloud() {
   set(ref(db, 'data'), {
     students: students,
     photos: photos,
-    attendance: attendance
+    attendance: serializeAttendance(),
+    updatedAt: Date.now()
   });
 }
 
-// 云读取
+// ✅ 云读取
 function loadFromCloud(callback) {
   onValue(ref(db, 'data'), (snapshot) => {
     const data = snapshot.val();
-    if (data) callback(data);
+    if (!data) return;
+
+    // 防止旧数据覆盖新数据
+    if (data.updatedAt && data.updatedAt < lastUpdate) return;
+
+    isSyncing = true;
+    lastUpdate = data.updatedAt || Date.now();
+
+    callback(data);
+
+    isSyncing = false;
   });
 }
 
-// 替换原保存
+// ✅ 重写 save（带锁）
 const originalSave = save;
 save = function() {
+  if (isSyncing) return;
   originalSave();
   saveToCloud();
 };
 
-// 页面加载同步
-
+// ✅ 页面加载同步
 loadFromCloud((cloudData)=>{
-  if (!cloudData) return;
-
   students = cloudData.students || [];
   photos = cloudData.photos || {};
-  attendance = cloudData.attendance || {};
+  attendance = deserializeAttendance(cloudData.attendance || {});
 
+  renderStats();
   renderStudents();
 });
-
 </script>
+
 </body>
 </html>
