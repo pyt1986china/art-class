@@ -35,6 +35,11 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .tab{padding:8px 14px;border-radius:999px 999px 0 0;font-size:13px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all 0.15s;border-bottom:2px solid transparent;}
 .tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
 
+/* Year selector */
+.year-selector{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:999px;font-size:13px;}
+.year-selector select{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);cursor:pointer;outline:none;}
+.year-selector select:focus{border-color:var(--accent);}
+
 /* Stats */
 .stats-bar{display:flex;gap:8px;padding:10px 14px;flex-shrink:0;overflow-x:auto;}
 .stat-pill{background:var(--surface);border-radius:12px;padding:8px 14px;white-space:nowrap;box-shadow:var(--shadow);flex-shrink:0;}
@@ -187,14 +192,26 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
     <div class="header-top">
       <div class="header-banner">
         <img src="https://picsum.photos/800/200" alt="banner">
-        <div class="header-title">🎨 美术班出勤 2026</div>
+        <div class="header-title" id="headerTitle">🎨 美术班出勤 2026</div>
       </div>
       <button class="add-btn" onclick="openAddModal()">＋</button>
     </div>
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('students')">学生</button>
-      <button class="tab" onclick="switchTab('history')">日历记录</button>
-      <button class="tab" onclick="switchTab('export')">导出</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px 8px;">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('students')">学生</button>
+        <button class="tab" onclick="switchTab('history')">日历记录</button>
+        <button class="tab" onclick="switchTab('export')">导出</button>
+      </div>
+      <div class="year-selector">
+        <label style="font-size:12px;font-weight:500;">年份：</label>
+        <select id="yearSelect" onchange="switchYear()">
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+          <option value="2030">2030</option>
+        </select>
+      </div>
     </div>
   </header>
 
@@ -244,21 +261,26 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 2026年所有周日 ──────────────────────────────
-const SUNDAYS_2026 = [
-  '2026-01-04','2026-01-11','2026-01-18','2026-01-25',
-  '2026-02-01','2026-02-08','2026-02-15','2026-02-22',
-  '2026-03-01','2026-03-08','2026-03-15','2026-03-22','2026-03-29',
-  '2026-04-05','2026-04-12','2026-04-19','2026-04-26',
-  '2026-05-03','2026-05-10','2026-05-17','2026-05-24','2026-05-31',
-  '2026-06-07','2026-06-14','2026-06-21','2026-06-28',
-  '2026-07-05','2026-07-12','2026-07-19','2026-07-26',
-  '2026-08-02','2026-08-09','2026-08-16','2026-08-23','2026-08-30',
-  '2026-09-06','2026-09-13','2026-09-20','2026-09-27',
-  '2026-10-04','2026-10-11','2026-10-18','2026-10-25',
-  '2026-11-01','2026-11-08','2026-11-15','2026-11-22','2026-11-29',
-  '2026-12-06','2026-12-13','2026-12-20','2026-12-27'
-];
+// ── 计算指定年份的所有周日 ──────────────────────────────
+function getSundaysForYear(year) {
+  const sundays = [];
+  const date = new Date(year, 0, 1);
+  
+  // 找到第一个周日
+  while (date.getDay() !== 0) {
+    date.setDate(date.getDate() + 1);
+  }
+  
+  // 收集整年所有周日
+  while (date.getFullYear() === year) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    sundays.push(`${year}-${month}-${day}`);
+    date.setDate(date.getDate() + 7);
+  }
+  
+  return sundays;
+}
 
 const MONTH_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
@@ -272,17 +294,26 @@ function groupByMonth(dates) {
   }
   return groups;
 }
-const SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_2026);
+
+// ── 全局变量 ────────────────────────────────────
+let currentYear = 2026;
+let SUNDAYS_CURRENT_YEAR = getSundaysForYear(2026);
+let SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_CURRENT_YEAR);
 
 // ── Storage ────────────────────────────────────
-const KEY = 'artclass2026_v3';
-const PHOTO_KEY = 'artclass2026_photos';
+const BASE_KEY = 'artclass_v4'; // 版本升级，支持多年份
+const PHOTO_KEY = 'artclass_photos';
 let students = [], attendance = {}, photos = {}; // photos[sid] = base64 dataURL
 let editingId = null, currentTab = 'students', activeFilter = 'all';
 
-function load() {
+function getStorageKey(year) {
+  return `${BASE_KEY}_${year}`;
+}
+
+function load(year = currentYear) {
   try {
-    const d = JSON.parse(localStorage.getItem(KEY)||'{}');
+    const key = getStorageKey(year);
+    const d = JSON.parse(localStorage.getItem(key)||'{}');
     students = d.students || [];
     const raw = d.attendance || {};
     attendance = {};
@@ -292,10 +323,11 @@ function load() {
   } catch(e) { seed(); }
 }
 
-function save() {
+function save(year = currentYear) {
   const att = {};
   for (const sid in attendance) att[sid] = [...attendance[sid]];
-  localStorage.setItem(KEY, JSON.stringify({students, attendance: att}));
+  const key = getStorageKey(year);
+  localStorage.setItem(key, JSON.stringify({students, attendance: att}));
 }
 
 function savePhotos() {
@@ -309,7 +341,33 @@ function seed() {
     {id:3, name:'小华', total:10, attended:0, paid:'unpaid', note:'138xxxx'},
   ];
   attendance = {1:new Set(), 2:new Set(), 3:new Set()};
-  save();
+  save(currentYear);
+}
+
+// ── 年份切换 ────────────────────────────────────
+function switchYear() {
+  const selectedYear = parseInt(document.getElementById('yearSelect').value);
+  if (selectedYear === currentYear) return;
+  
+  // 保存当前年份数据
+  save(currentYear);
+  
+  // 加载新年份数据
+  currentYear = selectedYear;
+  SUNDAYS_CURRENT_YEAR = getSundaysForYear(currentYear);
+  SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_CURRENT_YEAR);
+  load(currentYear);
+  
+  // 更新 Header
+  document.getElementById('headerTitle').textContent = `🎨 美术班出勤 ${currentYear}`;
+  
+  // 重新渲染
+  renderStats();
+  if (currentTab === 'students') renderStudents();
+  else if (currentTab === 'history') renderHistory();
+  else renderExport();
+  
+  showToast(`✅ 已切换到 ${currentYear} 年`);
 }
 
 // ── Helpers ────────────────────────────────────
@@ -529,7 +587,7 @@ function toggleDay(sid, date) {
     att.add(date);
     showToast(`✅ ${s.name} ${fmt(date)} 出勤已记录`);
   }
-  save();
+  save(currentYear);
   renderStats();
   renderStudents();
 }
@@ -572,7 +630,7 @@ function renderHistory() {
 function renderExport() {
   document.getElementById('content').innerHTML = `
     <div class="export-section">
-      <p>导出所有学生的出勤报告，可复制后发送给家长或粘贴到微信。</p>
+      <p>导出所有学生的 ${currentYear} 年出勤报告，可复制后发送给家长或粘贴到微信。</p>
       <button class="export-btn" onclick="doExport()">📋 复制出勤报告</button>
     </div>
     <div class="section-title">学生列表一览</div>
@@ -593,7 +651,7 @@ function renderExport() {
 
 function doExport() {
   const d = new Date().toLocaleDateString('zh-CN');
-  let txt = `🎨 美术班出勤报告 ${d}\n${'─'.repeat(26)}\n`;
+  let txt = `🎨 美术班出勤报告 ${currentYear} 年 ${d}\n${'─'.repeat(30)}\n`;
   for (const s of students) {
     const cnt = attendedCount(s);
     const att = [...getAtt(s.id)].sort();
@@ -603,7 +661,7 @@ function doExport() {
     if (s.note) txt += `   备注：${s.note}\n`;
     if (att.length) txt += `   出勤日期：${att.map(fmt).join('、')}\n`;
   }
-  txt += `\n${'─'.repeat(26)}\n共 ${students.length} 名学生`;
+  txt += `\n${'─'.repeat(30)}\n共 ${students.length} 名学生`;
   navigator.clipboard.writeText(txt)
     .then(() => showToast('✅ 已复制到剪贴板'))
     .catch(() => prompt('请手动复制：', txt));
@@ -693,7 +751,7 @@ function saveStudent() {
     students.push({id, name, total, attended, paid, note});
     attendance[id] = new Set();
   }
-  save(); closeModal(); renderStats();
+  save(currentYear); closeModal(); renderStats();
   if (currentTab==='students') renderStudents();
   showToast(editingId ? '✅ 已更新' : `✅ 已添加 ${name}`);
 }
@@ -705,7 +763,7 @@ function deleteStudent() {
   students = students.filter(x=>x.id!==editingId);
   delete attendance[editingId];
   delete photos[editingId];
-  save(); savePhotos(); closeModal(); renderStats(); renderStudents();
+  save(currentYear); savePhotos(); closeModal(); renderStats(); renderStudents();
   showToast('已删除');
 }
 
@@ -718,7 +776,7 @@ function showToast(msg) {
 }
 
 // ── Init ───────────────────────────────────────
-load(); renderStats(); renderStudents();
+load(2026); renderStats(); renderStudents();
 </script>
 
 <!-- Firebase 云同步脚本 -->
@@ -733,36 +791,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 云保存 - 正确序列化 Set 为数组
+// 云保存 - 按年份分类存储
 function saveToCloud() {
   const att = {};
   for (const sid in attendance) {
     att[sid] = [...attendance[sid]];
   }
-  set(ref(db, 'data'), {
+  set(ref(db, `data/${currentYear}`), {
     students: students,
     photos: photos,
     attendance: att
   }).catch(err => console.error('Cloud save error:', err));
 }
 
-// 云读取 - 正确反序列化数组为 Set
-function loadFromCloud(callback) {
-  onValue(ref(db, 'data'), (snapshot) => {
+// 云读取 - 按年份加载数据
+function loadFromCloud(year, callback) {
+  onValue(ref(db, `data/${year}`), (snapshot) => {
     const data = snapshot.val();
     if (data) callback(data);
   }, err => console.error('Cloud load error:', err));
 }
 
 // 替换原保存
-const originalSave = save;
-window.save = function() {
-  originalSave();
+const originalSave = window.save;
+window.save = function(year = currentYear) {
+  originalSave(year);
   saveToCloud();
 };
 
 // 页面加载时同步云端数据
-loadFromCloud((cloudData) => {
+loadFromCloud(currentYear, (cloudData) => {
   if (!cloudData) return;
 
   students = cloudData.students || [];
