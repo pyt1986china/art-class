@@ -1,1 +1,862 @@
-<!DOCTYPE html> <html lang="zh-CN"> <head> <meta charset="UTF-8"/> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> <meta name="apple-mobile-web-app-capable" content="yes"/> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/> <meta name="apple-mobile-web-app-title" content="美术班出勤"/> <meta name="theme-color" content="#fff"/> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet"/> <style> :root{ --bg:#f6f4f0; --surface:#fff; --surface2:#f0ede8; --accent:#c17f3e; --accent2:#8b5e3c; --text:#1c1a18; --text2:#6b6460; --text3:#aaa; --green:#3a7d52; --green-bg:#e8f5ed; --amber:#b87333; --amber-bg:#fdf3e7; --red:#c0392b; --red-bg:#fdecea; --blue:#2471a3; --blue-bg:#e8f4fd; --border:rgba(0,0,0,0.08); --radius:16px; --radius-sm:10px; --shadow:0 2px 12px rgba(0,0,0,0.07); } *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;} html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:auto;} #app{display:flex;flex-direction:column;height:100vh;height:100dvh;} /* Header */ header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px 0;flex-shrink:0;} .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;} .header-top h1{font-size:19px;font-weight:700;color:var(--text);} .add-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;} .tabs{display:flex;gap:4px;border-bottom:none;} .tab{padding:8px 14px;border-radius:999px 999px 0 0;font-size:13px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all 0.15s;border-bottom:2px solid transparent;} .tab.active{color:var(--accent);border-bottom:2px solid var(--accent);} /* Stats */ .stats-bar{display:flex;gap:8px;padding:10px 14px;flex-shrink:0;overflow-x:auto;} .stat-pill{background:var(--surface);border-radius:12px;padding:8px 14px;white-space:nowrap;box-shadow:var(--shadow);flex-shrink:0;} .stat-pill .n{font-size:18px;font-weight:700;color:var(--accent);} .stat-pill .l{font-size:11px;color:var(--text2);margin-top:1px;} /* Content scroll */ .content{flex:1;overflow-y:auto;padding:0 12px 90px;-webkit-overflow-scrolling:touch;} /* Search */ .search-bar{padding:8px 12px 4px;flex-shrink:0;} .search-input{width:100%;padding:9px 14px;border-radius:999px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;} .search-input:focus{border-color:var(--accent);} /* Student card */ .student-card{background:var(--surface);border-radius:var(--radius);margin:8px 0;box-shadow:var(--shadow);overflow:hidden;} .card-header{display:flex;align-items:center;gap:11px;padding:13px 14px 10px;} .avatar-wrap{position:relative;flex-shrink:0;width:46px;height:46px;} .avatar{width:46px;height:46px;border-radius:50%;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;object-fit:cover;cursor:pointer;border:2px solid rgba(255,255,255,0.6);} .avatar-cam{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1.5px solid var(--surface);cursor:pointer;pointer-events:none;} .photo-input{display:none;} .card-info{flex:1;min-width:0;} .card-name{font-size:15px;font-weight:700;} .card-meta{font-size:11px;color:var(--text2);margin-top:2px;} .card-badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center;} .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;} .badge-ok{background:var(--green-bg);color:var(--green);} .badge-warn{background:var(--amber-bg);color:var(--amber);} .badge-danger{background:var(--red-bg);color:var(--red);} .badge-paid{background:var(--blue-bg);color:var(--blue);} .badge-unpaid{background:var(--red-bg);color:var(--red);} /* Progress */ .prog-row{display:flex;align-items:center;gap:10px;padding:0 14px 10px;} .prog-bar{flex:1;height:5px;background:var(--surface2);border-radius:999px;overflow:hidden;} .prog-fill{height:100%;border-radius:999px;background:var(--accent);transition:width 0.4s;} .prog-text{font-size:11px;color:var(--text2);white-space:nowrap;} /* Calendar grid inside card */ .cal-wrapper{padding:0 14px 14px;} .cal-month-group{margin-bottom:12px;} .cal-month-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;} .cal-days{display:flex;flex-wrap:wrap;gap:6px;} .cal-day{width:38px;height:38px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);transition:all 0.15s;flex-shrink:0;position:relative;} .cal-day:active{transform:scale(0.92);} .cal-day .day-num{font-size:11px;font-weight:600;color:var(--text2);line-height:1;} .cal-day .day-mon{font-size:9px;color:var(--text3);line-height:1;margin-top:1px;} .cal-day.attended{background:var(--green-bg);border-color:#a8d5b8;} .cal-day.attended .day-num{color:var(--green);} .cal-day.attended::after{content:'✅';font-size:10px;position:absolute;top:-5px;right:-5px;line-height:1;} .cal-day.today-day{border-color:var(--accent);border-width:2px;} .cal-day.today-day .day-num{color:var(--accent);} .cal-day.future-day{opacity:0.45;cursor:default;} .cal-day.skipped{background:var(--surface);border-color:var(--border);} /* Month selector */ .month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px;} .month-nav-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;} .month-nav-title{font-size:14px;font-weight:700;color:var(--text);} /* Expand toggle */ .card-toggle{display:flex;align-items:center;justify-content:center;padding:6px;border-top:1px solid var(--border);cursor:pointer;color:var(--text3);font-size:12px;gap:4px;} .card-toggle:active{background:var(--surface2);} /* History */ .date-group{margin:4px 0 12px;} .date-label{font-size:12px;font-weight:600;color:var(--text2);padding:10px 4px 5px;} .history-item{background:var(--surface);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);} .history-name{font-size:14px;font-weight:600;} .history-sub{font-size:11px;color:var(--text2);margin-top:2px;} /* Modal */ .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;} .overlay.open{display:flex;} .sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:18px 20px 44px;animation:slideUp 0.22s ease;} @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}} .sheet-handle{width:36px;height:4px;background:var(--surface2);border-radius:999px;margin:0 auto 16px;} .sheet h2{font-size:17px;font-weight:700;margin-bottom:16px;} .form-group{margin-bottom:14px;} .form-group label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:5px;} .form-group input,.form-group select{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:15px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;} .form-group input:focus,.form-group select:focus{border-color:var(--accent);} .form-row{display:flex;gap:10px;} .form-row .form-group{flex:1;} .sheet-actions{display:flex;gap:8px;margin-top:18px;} .sheet-actions .btn{flex:1;padding:13px;font-size:15px;border-radius:var(--radius-sm);font-family:inherit;} .btn{border:none;cursor:pointer;font-weight:500;transition:opacity 0.15s;} .btn:active{opacity:0.75;} .btn-primary{background:var(--accent);color:#fff;} .btn-cancel{background:var(--surface2);color:var(--text2);} .btn-danger{background:var(--red-bg);color:var(--red);width:100%;padding:11px;font-size:14px;border-radius:var(--radius-sm);margin-top:6px;font-family:inherit;} /* Toast */ .toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:rgba(28,26,24,0.92);color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;} .toast.show{opacity:1;} /* Bottom nav */ .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:100;} .nav-btn{flex:1;padding:10px 0 7px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-family:inherit;} .nav-btn.active{color:var(--accent);} .nav-icon{font-size:21px;line-height:1;} /* Filter chips */ .filter-row{display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;flex-shrink:0;} .filter-chip{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;white-space:nowrap;} .filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);} /* Empty */ .empty{text-align:center;padding:50px 20px;color:var(--text3);} .empty .icon{font-size:44px;margin-bottom:10px;} .empty p{font-size:14px;line-height:1.7;} /* Export */ .export-section{background:var(--surface);border-radius:var(--radius);padding:16px;margin:8px 0;box-shadow:var(--shadow);} .export-section p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:12px;} .export-btn{width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:inherit;margin-bottom:8px;} .section-title{font-size:11px;font-weight:600;color:var(--text3);padding:12px 4px 5px;letter-spacing:0.5px;} .header-banner { position: relative; border-radius: 14px; overflow: hidden; margin-bottom: 10px; } .header-banner { width: 100%; overflow: hidden; } .header-banner img { width: 100%; height: 20vh; /* 根据屏幕高度 */ object-fit: cover; } .header-title { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: 18px; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,0.5); } </style> </head> <body> <div id="app"> <header> <div class="header-top"> <!-- ✅ 放这里（header-top 外面） --> <div class="header-banner"> <img src="https://picsum.photos/800/200"> <div class="header-title">🎨 美术班出勤 2026</div> </div> <button class="add-btn" onclick="openAddModal()">＋</button> </div> <div class="tabs"> <button class="tab active" onclick="switchTab('students')">学生</button> <button class="tab" onclick="switchTab('history')">日历记录</button> <button class="tab" onclick="switchTab('export')">导出</button> </div> </header> <div id="statsBar" class="stats-bar"></div> <div id="searchRow" class="search-bar"> <input class="search-input" type="search" placeholder="🔍 搜索学生…" oninput="render()" id="searchInput"/> </div> <div id="filterRow" class="filter-row"> <button class="filter-chip active" onclick="setFilter('all',this)">全部</button> <button class="filter-chip" onclick="setFilter('low',this)">课时不足</button> <button class="filter-chip" onclick="setFilter('unpaid',this)">未缴费</button> </div> <div id="content" class="content"></div> <div class="bottom-nav"> <button class="nav-btn active" onclick="switchTab('students')" id="nav-students"><span class="nav-icon">👥</span><span>学生</span></button> <button class="nav-btn" onclick="switchTab('history')" id="nav-history"><span class="nav-icon">📅</span><span>日历</span></button> <button class="nav-btn" onclick="switchTab('export')" id="nav-export"><span class="nav-icon">📤</span><span>导出</span></button> </div> </div> <!-- Modal --> <div class="overlay" id="modal" onclick="if(event.target===this)closeModal()"> <div class="sheet"> <div class="sheet-handle"></div> <h2 id="modalTitle">添加学生</h2> <div class="form-group"><label>学生姓名</label><input type="text" id="fName" placeholder="请输入姓名"/></div> <div class="form-row"> <div class="form-group"><label>总课时</label><input type="number" id="fTotal" placeholder="如 20" min="1"/></div> <div class="form-group"><label>已上课次</label><input type="number" id="fAttended" placeholder="0" min="0"/></div> </div> <div class="form-group"><label>缴费状态</label> <select id="fPaid"><option value="paid">已缴费</option><option value="unpaid">未缴费</option></select> </div> <div class="form-group"><label>备注（选填）</label><input type="text" id="fNote" placeholder="如：联系电话、上课时段…"/></div> <div class="sheet-actions"> <button class="btn btn-cancel" onclick="closeModal()">取消</button> <button class="btn btn-primary" onclick="saveStudent()">保存</button> </div> <div id="deleteRow" style="display:none"> <button class="btn btn-danger" onclick="deleteStudent()">删除该学生</button> </div> </div> </div> <div class="toast" id="toast"></div> <script> let currentYear = new Date().getFullYear(); function renderAll() { renderStats(); renderStudents(); } function changeYear(delta) { currentYear += delta; // 更新年份显示 document.getElementById('yearLabel').textContent = currentYear; // 更新标题 document.querySelector('.header-title').textContent = 🎨 美术班出勤 ${currentYear}; // 重新渲染页面 renderAll(); } // ── 2026年所有周日 ────────────────────────────── function getSundays(year) { const sundays = []; const d = new Date(year, 0, 1); // 找到第一个周日 while (d.getDay() !== 0) { d.setDate(d.getDate() + 1); } while (d.getFullYear() === year) { const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); sundays.push(${y}-${m}-${day}); d.setDate(d.getDate() + 7); } return sundays; } = [ '2026-01-04','2026-01-11','2026-01-18','2026-01-25', '2026-02-01','2026-02-08','2026-02-15','2026-02-22', '2026-03-01','2026-03-08','2026-03-15','2026-03-22','2026-03-29', '2026-04-05','2026-04-12','2026-04-19','2026-04-26', '2026-05-03','2026-05-10','2026-05-17','2026-05-24','2026-05-31', '2026-06-07','2026-06-14','2026-06-21','2026-06-28', '2026-07-05','2026-07-12','2026-07-19','2026-07-26', '2026-08-02','2026-08-09','2026-08-16','2026-08-23','2026-08-30', '2026-09-06','2026-09-13','2026-09-20','2026-09-27', '2026-10-04','2026-10-11','2026-10-18','2026-10-25', '2026-11-01','2026-11-08','2026-11-15','2026-11-22','2026-11-29', '2026-12-06','2026-12-13','2026-12-20','2026-12-27' ]; const MONTH_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']; // key → month groups function groupByMonth(dates) { const groups = {}; for (const d of dates) { const m = d.slice(0,7); if (!groups[m]) groups[m] = []; groups[m].push(d); } return groups; } function getSundaysByMonth(year) { return groupByMonth(getSundays(year)); } // ── Storage ──────────────────────────────────── const KEY = 'artclass2026_v3'; const PHOTO_KEY = 'artclass2026_photos'; let students = [], attendance = {}, photos = {}; // photos[sid] = base64 dataURL let editingId = null, currentTab = 'students', activeFilter = 'all'; function load() { try { const d = JSON.parse(localStorage.getItem(KEY)||'{}'); students = d.students || []; const raw = d.attendance || {}; attendance = {}; for (const sid in raw) attendance[sid] = new Set(raw[sid]); try { photos = JSON.parse(localStorage.getItem(PHOTO_KEY)||'{}'); } catch(e){ photos={}; } if (!students.length) seed(); } catch(e) { seed(); } } function save() { const att = {}; for (const sid in attendance) att[sid] = [...attendance[sid]]; localStorage.setItem(KEY, JSON.stringify({students, attendance: att})); } function savePhotos() { try { localStorage.setItem(PHOTO_KEY, JSON.stringify(photos)); } catch(e) { showToast('⚠️ 照片存储空间不足'); } } function seed() { students = [ {id:1, name:'小明', total:20, attended:0, paid:'paid', note:''}, {id:2, name:'小红', total:15, attended:0, paid:'paid', note:''}, {id:3, name:'小华', total:10, attended:0, paid:'unpaid', note:'138xxxx'}, ]; attendance = {1:new Set(), 2:new Set(), 3:new Set()}; } // ── Helpers ──────────────────────────────────── function today() { const d = new Date(); return ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}; } function getAtt(sid) { return attendance[sid] || new Set(); } function attendedCount(s) { const manual = s.attended || 0; return getAtt(s.id).size + manual; } function remain(s) { return Math.max(0, s.total - attendedCount(s)); } function statusInfo(s) { const r = remain(s); if (r <= 0) return {cls:'badge-danger', txt:'已结束'}; if (r <= 3) return {cls:'badge-warn', txt:剩余${r}节}; return {cls:'badge-ok', txt:剩余${r}节}; } const AVA_COLORS = ['#c17f3e','#4a7c59','#7c5c4a','#3e6fa8','#7c4a6f','#4a7c7c','#7c4a4a','#5c7c4a']; function avaColor(name) { let h=0; for(let c of name) h+=c.charCodeAt(0); return AVA_COLORS[h%AVA_COLORS.length]; } function fmt(d) { // '2026-01-04' → '1/4' const [,m,day] = d.split('-'); return ${+m}/${+day}; } function avatarHTML(s) { const photo = photos[s.id]; if (photo) { return <div class="avatar-wrap" onclick="triggerPhotoUpload(${s.id})"> <img class="avatar" src="${photo}" alt="${s.name}"/> <div class="avatar-cam">📷</div> <input class="photo-input" type="file" accept="image/*" id="photo-${s.id}" onchange="handlePhoto(event,${s.id})"/> </div>; } return <div class="avatar-wrap" onclick="triggerPhotoUpload(${s.id})"> <div class="avatar" style="background:${avaColor(s.name)}">${s.name[0]}</div> <div class="avatar-cam">📷</div> <input class="photo-input" type="file" accept="image/*" id="photo-${s.id}" onchange="handlePhoto(event,${s.id})"/> </div>; } function triggerPhotoUpload(sid) { const inp = document.getElementById(photo-${sid}); if (inp) inp.click(); } function handlePhoto(event, sid) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { // Compress image before saving const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); const max = 200; let w = img.width, h = img.height; if (w > h) { if (w > max) { h = h*(max/w); w = max; } } else { if (h > max) { w = w*(max/h); h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); photos[sid] = canvas.toDataURL('image/jpeg', 0.75); savePhotos(); renderStudents(); showToast('✅ 头像已更新'); }; img.src = e.target.result; }; reader.readAsDataURL(file); } // ── Render helpers ───────────────────────────── function renderStats() { const total = students.length; const todayStr = today(); function renderStats() { const todayStr = today(); let total = students.length; let todayChecked = 0; let lowCount = 0; let unpaid = 0; for (const s of students) { const r = remain(s); if (getAtt(s.id).has(todayStr)) todayChecked++; if (r > 0 && r <= 3) lowCount++; if (s.paid === 'unpaid') unpaid++; } document.getElementById('statsBar').innerHTML = <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div> <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div> <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div> <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div> ; } const lowCount = students.filter(s => { const r=remain(s); return r>0&&r<=3; }).length; const unpaid = students.filter(s => s.paid==='unpaid').length; document.getElementById('statsBar').innerHTML = <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div> <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div> <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div> <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div> ; } // ── Student Tab ──────────────────────────────── function renderStudents() { const q = (document.getElementById('searchInput')?.value||'').trim().toLowerCase(); let list = students.filter(s => !q || s.name.toLowerCase().includes(q)); if (activeFilter==='low') list = list.filter(s => { const r=remain(s); return r>0&&r<=3; }); if (activeFilter==='unpaid') list = list.filter(s => s.paid==='unpaid'); const todayStr = today(); if (!list.length) { document.getElementById('content').innerHTML = <div class="empty"><div class="icon">🎨</div><p>暂无学生记录<br>点右上角 ＋ 添加</p></div>; return; } document.getElementById('content').innerHTML = list.map(s => { const att = getAtt(s.id); const total_attended = attendedCount(s); const pct = s.total>0 ? Math.round((total_attended/s.total)*100) : 0; const st = statusInfo(s); const paidBadge = s.paid==='paid' ? '<span class="badge badge-paid">已缴费</span>' : '<span class="badge badge-unpaid">未缴费</span>'; // Show only current month's sundays in card preview, rest collapsed const nowMonth = todayStr.slice(0,7); const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || []; const dayCells = monthSundays.map(d => { const isAtt = att.has(d); const isToday = d === todayStr; const isFuture = d > todayStr; let cls = 'cal-day'; if (isAtt) cls += ' attended'; else if (isToday) cls += ' today-day'; else if (isFuture) cls += ' future-day'; else cls += ' skipped'; const clickable = !isFuture ? onclick="toggleDay(${s.id},'${d}')" : ''; return <div class="${cls}" ${clickable}><div class="day-num">${fmt(d)}</div></div>; }).join(''); const monthLabel = MONTH_NAMES[+nowMonth.slice(5)-1]; return <div class="student-card" id="card-${s.id}"> <div class="card-header"> ${avatarHTML(s)} <div class="card-info"> <div class="card-name">${s.name}</div> <div class="card-meta">${s.note||'已上'+total_attended+'节'}</div> </div> <div class="card-badges"> <span class="badge ${st.cls}">${st.txt}</span> ${paidBadge} </div> </div> <div class="prog-row"> <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div> <span class="prog-text">${total_attended}/${s.total}节</span> </div> <div class="cal-wrapper"> <div class="cal-month-label">${monthLabel}的课程</div> <div class="cal-days">${dayCells}</div> </div> <div class="card-toggle" onclick="toggleFullCal(${s.id})"> <span id="toggle-label-${s.id}">▼ 查看全年日历</span> </div> <div id="fullcal-${s.id}" style="display:none"> ${renderFullCal(s.id, att)} </div> lex;gap:8px;padding:0 14px 13px;"> <button class="btn btn-cancel" style="flex:1;padding:9px;font-size:13px;border-radius:var(--radius-sm)" onclick="openEditModal(${s.id})">编辑</button> </div> </div>; }).join(''); } function renderFullCal(sid, att) { const todayStr = today(); return Object.entries(getSundaysByMonth(currentYear)).map(([month, days]) => { const label = MONTH_NAMES[+month.slice(5)-1]; const cells = days.map(d => { const isAtt = att.has(d); const isFuture = d > todayStr; const isToday = d === todayStr; let cls = 'cal-day'; if (isAtt) cls += ' attended'; else if (isToday) cls += ' today-day'; else if (isFuture) cls += ' future-day'; else cls += ' skipped'; const clickable = !isFuture ? onclick="toggleDay(${sid},'${d}')" : ''; return <div class="${cls}" ${clickable}><div class="day-num">${fmt(d)}</div></div>; }).join(''); return <div class="cal-month-group" style="padding:0 14px 4px"> <div class="cal-month-label">${label}</div> <div class="cal-days">${cells}</div> </div>; }).join(''); } let expandedCards = new Set(); function toggleFullCal(sid) { const el = document.getElementById(fullcal-${sid}); const lbl = document.getElementById(toggle-label-${sid}); if (!el) return; if (expandedCards.has(sid)) { el.style.display = 'none'; lbl.textContent = '▼ 查看全年日历'; expandedCards.delete(sid); } else { el.style.display = 'block'; lbl.textContent = '▲ 收起'; expandedCards.add(sid); } } function toggleDay(sid, date) { const s = students.find(x => x.id === sid); if (!s) return; if (!attendance[sid]) attendance[sid] = new Set(); const att = attendance[sid]; if (att.has(date)) { att.delete(date); showToast(${s.name} 取消 ${fmt(date)} 的出勤); } else { if (attendedCount(s) >= s.total) { showToast(⚠️ ${s.name} 课时已用完，请先续课); return; } att.add(date); showToast(✅ ${s.name} ${fmt(date)} 出勤已记录); } renderAll(); } // ── History Tab ──────────────────────────────── function renderHistory() { const content = document.getElementById('content'); // Collect all attended dates across all students const allRecords = []; for (const s of students) { const att = getAtt(s.id); for (const d of att) allRecords.push({date:d, student:s}); } if (!allRecords.length) { content.innerHTML = <div class="empty"><div class="icon">📅</div><p>暂无出勤记录<br>在学生页点击日期打卡</p></div>; return; } allRecords.sort((a,b) => b.date.localeCompare(a.date)); const groups = {}; for (const r of allRecords) { if (!groups[r.date]) groups[r.date] = []; groups[r.date].push(r); } const todayStr = today(); content.innerHTML = Object.entries(groups).map(([date, recs]) => { const label = date===todayStr ? 今天 ${date} : date; const items = recs.map(r => <div class="history-item"> <div> <div class="history-name">${r.student.name}</div> <div class="history-sub">已上${attendedCount(r.student)}节 · 剩余${remain(r.student)}节</div> </div> <span style="font-size:20px">✅</span> </div>).join(''); return <div class="date-group"><div class="date-label">📅 ${label}（${recs.length}人出勤）</div>${items}</div>; }).join(''); } // ── Export Tab ───────────────────────────────── function renderExport() { document.getElementById('content').innerHTML = <div class="export-section"> <p>导出所有学生的出勤报告，可复制后发送给家长或粘贴到微信。</p> <button class="export-btn" onclick="doExport()">📋 复制出勤报告</button> </div> <div class="section-title">学生列表一览</div> ${students.map(s => { const r = remain(s); const cnt = attendedCount(s); const st = statusInfo(s); return <div class="history-item" style="border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:6px"> <div> <div class="history-name">${s.name}</div> <div class="history-sub">已上${cnt}节 · 剩余${r}节 · ${s.paid==='paid'?'已缴费':'未缴费'}</div> </div> <span class="badge ${st.cls}">${st.txt}</span> </div>; }).join('')} ; } function doExport() { const d = new Date().toLocaleDateString('zh-CN'); let txt = 🎨 美术班出勤报告 ${d}\n${'─'.repeat(26)}\n; for (const s of students) { const cnt = attendedCount(s); const att = [...getAtt(s.id)].sort(); txt += \n👤 ${s.name}\n; txt += 课时：${cnt}/${s.total}节，剩余 ${remain(s)} 节\n; txt += 缴费：${s.paid==='paid'?'✅ 已缴费':'❌ 未缴费'}\n; if (s.note) txt += 备注：${s.note}\n; if (att.length) txt += 出勤日期：${att.map(fmt).join('、')}\n; } txt += \n${'─'.repeat(26)}\n共 ${students.length} 名学生; navigator.clipboard.writeText(txt) .then(() => showToast('✅ 已复制到剪贴板')) .catch(() => prompt('请手动复制：', txt)); } // ── Tab / Filter ─────────────────────────────── function switchTab(tab) { currentTab = tab; document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['students','history','export'][i]===tab)); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(nav-${tab})?.classList.add('active'); const showSearch = tab==='students'; document.getElementById('searchRow').style.display = showSearch?'block':'none'; document.getElementById('filterRow').style.display = showSearch?'flex':'none'; renderStats(); if (tab==='students') renderStudents(); else if (tab==='history') renderHistory(); else renderExport(); } function setFilter(f, el) { activeFilter = f; document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderStudents(); } // ── Modal ────────────────────────────────────── function openAddModal() { editingId = null; document.getElementById('modalTitle').textContent = '添加学生'; document.getElementById('fName').value=''; document.getElementById('fTotal').value=''; document.getElementById('fAttended').value='0'; document.getElementById('fPaid').value='paid'; document.getElementById('fNote').value=''; document.getElementById('deleteRow').style.display='none'; document.getElementById('modal').classList.add('open'); setTimeout(()=>document.getElementById('fName').focus(), 300); } function openEditModal(id) { const s = students.find(x=>x.id===id); if (!s) return; editingId = id; document.getElementById('modalTitle').textContent = '编辑学生'; document.getElementById('fName').value = s.name; document.getElementById('fTotal').value = s.total; document.getElementById('fAttended').value = s.attended||0; document.getElementById('fPaid').value = s.paid||'paid'; document.getElementById('fNote').value = s.note||''; document.getElementById('deleteRow').style.display='block'; document.getElementById('modal').classList.add('open'); } function closeModal() { document.getElementById('modal').classList.remove('open'); editingId = null; } function saveStudent() { const name = document.getElementById('fName').value.trim(); const total = parseInt(document.getElementById('fTotal').value); const attended = parseInt(document.getElementById('fAttended').value)||0; const paid = document.getElementById('fPaid').value; const note = document.getElementById('fNote').value.trim(); if (!name) { showToast('请填写学生姓名'); return; } if (!total||total<1) { showToast('请填写有效课时数'); return; } if (editingId) { const s = students.find(x=>x.id===editingId); Object.assign(s, {name, total, attended, paid, note}); } else { const id = crypto.randomUUID(); students.push({id, name, total, attended, paid, note}); attendance[id] = new Set(); } closeModal(); renderStats(); if (currentTab==='students') renderStudents(); showToast(editingId ? '✅ 已更新' : ✅ 已添加 ${name}); } function deleteStudent() { if (!editingId) return; const s = students.find(x=>x.id===editingId); if (!confirm(确定删除 ${s?.name} 的全部记录吗？)) return; students = students.filter(x=>x.id!==editingId); delete attendance[editingId]; delete photos[editingId]; savePhotos(); closeModal(); renderAll(); showToast('已删除'); } function render() { if(currentTab==='students') renderStudents(); } function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2200); } // ── Init ─────────────────────────────────────── load(); renderAll(); </script> <script type="module"> import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"; const firebaseConfig = { databaseURL: "https://art-class-1108b-default-rtdb.europe-west1.firebasedatabase.app" }; const app = initializeApp(firebaseConfig); const db = getDatabase(app); // ✅ 防循环锁 let isSyncing = false; // ✅ 时间戳（防覆盖） let lastUpdate = 0; // ✅ Set → Array（存云） function serializeAttendance() { const result = {}; for (const sid in attendance) { result[sid] = [...attendance[sid]]; } return result; } // ✅ Array → Set（读云） function deserializeAttendance(raw) { const result = {}; for (const sid in raw) { result[sid] = new Set(raw[sid]); } return result; } // ✅ 云保存 function saveToCloud() { set(ref(db, 'data'), { students: students, photos: photos, attendance: serializeAttendance(), updatedAt: Date.now() }); } // ✅ 云读取 function loadFromCloud(callback) { onValue(ref(db, 'data'), (snapshot) => { const data = snapshot.val(); if (!data) return; // 防止旧数据覆盖新数据 if (data.updatedAt && data.updatedAt < lastUpdate) return; isSyncing = true; lastUpdate = data.updatedAt || Date.now(); callback(data); isSyncing = false; }); } // ✅ 重写 save（带锁） const originalSave = save; save = function() { if (isSyncing) return; originalSave(); clearTimeout(window._cloudTimer); window._cloudTimer = setTimeout(() => { saveToCloud(); }, 300); }; // ✅ 页面加载同步 loadFromCloud((cloudData)=>{ students = cloudData.students || []; photos = cloudData.photos || {}; attendance = deserializeAttendance(cloudData.attendance || {}); renderStats(); renderStudents(); }); </script> </body> </html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="美术班出勤"/>
+<meta name="theme-color" content="#fff"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f6f4f0;--surface:#fff;--surface2:#f0ede8;
+  --accent:#c17f3e;--accent2:#8b5e3c;
+  --text:#1c1a18;--text2:#6b6460;--text3:#aaa;
+  --green:#3a7d52;--green-bg:#e8f5ed;
+  --amber:#b87333;--amber-bg:#fdf3e7;
+  --red:#c0392b;--red-bg:#fdecea;
+  --blue:#2471a3;--blue-bg:#e8f4fd;
+  --border:rgba(0,0,0,0.08);
+  --radius:16px;--radius-sm:10px;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:auto;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+
+/* Header */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px 0;flex-shrink:0;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.header-top h1{font-size:19px;font-weight:700;color:var(--text);}
+.add-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tabs{display:flex;gap:4px;border-bottom:none;}
+.tab{padding:8px 14px;border-radius:999px 999px 0 0;font-size:13px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all 0.15s;border-bottom:2px solid transparent;}
+.tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
+
+/* Stats */
+.stats-bar{display:flex;gap:8px;padding:10px 14px;flex-shrink:0;overflow-x:auto;}
+.stat-pill{background:var(--surface);border-radius:12px;padding:8px 14px;white-space:nowrap;box-shadow:var(--shadow);flex-shrink:0;}
+.stat-pill .n{font-size:18px;font-weight:700;color:var(--accent);}
+.stat-pill .l{font-size:11px;color:var(--text2);margin-top:1px;}
+
+/* Content scroll */
+.content{flex:1;overflow-y:auto;padding:0 12px 90px;-webkit-overflow-scrolling:touch;}
+
+/* Search */
+.search-bar{padding:8px 12px 4px;flex-shrink:0;}
+.search-input{width:100%;padding:9px 14px;border-radius:999px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;}
+.search-input:focus{border-color:var(--accent);}
+
+/* Student card */
+.student-card{background:var(--surface);border-radius:var(--radius);margin:8px 0;box-shadow:var(--shadow);overflow:hidden;}
+.card-header{display:flex;align-items:center;gap:11px;padding:13px 14px 10px;}
+.avatar-wrap{position:relative;flex-shrink:0;width:46px;height:46px;}
+.avatar{width:46px;height:46px;border-radius:50%;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;object-fit:cover;cursor:pointer;border:2px solid rgba(255,255,255,0.6);}
+.avatar-cam{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1.5px solid var(--surface);cursor:pointer;pointer-events:none;}
+.photo-input{display:none;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:15px;font-weight:700;}
+.card-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.card-badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;}
+.badge-ok{background:var(--green-bg);color:var(--green);}
+.badge-warn{background:var(--amber-bg);color:var(--amber);}
+.badge-danger{background:var(--red-bg);color:var(--red);}
+.badge-paid{background:var(--blue-bg);color:var(--blue);}
+.badge-unpaid{background:var(--red-bg);color:var(--red);}
+
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:10px;padding:0 14px 10px;}
+.prog-bar{flex:1;height:5px;background:var(--surface2);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;background:var(--accent);transition:width 0.4s;}
+.prog-text{font-size:11px;color:var(--text2);white-space:nowrap;}
+
+/* Calendar grid inside card */
+.cal-wrapper{padding:0 14px 14px;}
+.cal-month-group{margin-bottom:12px;}
+.cal-month-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;}
+.cal-days{display:flex;flex-wrap:wrap;gap:6px;}
+.cal-day{width:38px;height:38px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);transition:all 0.15s;flex-shrink:0;position:relative;}
+.cal-day:active{transform:scale(0.92);}
+.cal-day .day-num{font-size:11px;font-weight:600;color:var(--text2);line-height:1;}
+.cal-day .day-mon{font-size:9px;color:var(--text3);line-height:1;margin-top:1px;}
+.cal-day.attended{background:var(--green-bg);border-color:#a8d5b8;}
+.cal-day.attended .day-num{color:var(--green);}
+.cal-day.attended::after{content:'✅';font-size:10px;position:absolute;top:-5px;right:-5px;line-height:1;}
+.cal-day.today-day{border-color:var(--accent);border-width:2px;}
+.cal-day.today-day .day-num{color:var(--accent);}
+.cal-day.future-day{opacity:0.45;cursor:default;}
+.cal-day.skipped{background:var(--surface);border-color:var(--border);}
+
+/* Month selector */
+.month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px;}
+.month-nav-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;}
+.month-nav-title{font-size:14px;font-weight:700;color:var(--text);}
+
+/* Expand toggle */
+.card-toggle{display:flex;align-items:center;justify-content:center;padding:6px;border-top:1px solid var(--border);cursor:pointer;color:var(--text3);font-size:12px;gap:4px;}
+.card-toggle:active{background:var(--surface2);}
+
+/* History */
+.date-group{margin:4px 0 12px;}
+.date-label{font-size:12px;font-weight:600;color:var(--text2);padding:10px 4px 5px;}
+.history-item{background:var(--surface);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+.history-name{font-size:14px;font-weight:600;}
+.history-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:18px 20px 44px;animation:slideUp 0.22s ease;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sheet-handle{width:36px;height:4px;background:var(--surface2);border-radius:999px;margin:0 auto 16px;}
+.sheet h2{font-size:17px;font-weight:700;margin-bottom:16px;}
+.form-group{margin-bottom:14px;}
+.form-group label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:5px;}
+.form-group input,.form-group select{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:15px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.form-row{display:flex;gap:10px;}
+.form-row .form-group{flex:1;}
+.sheet-actions{display:flex;gap:8px;margin-top:18px;}
+.sheet-actions .btn{flex:1;padding:13px;font-size:15px;border-radius:var(--radius-sm);font-family:inherit;}
+.btn{border:none;cursor:pointer;font-weight:500;transition:opacity 0.15s;}
+.btn:active{opacity:0.75;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-cancel{background:var(--surface2);color:var(--text2);}
+.btn-danger{background:var(--red-bg);color:var(--red);width:100%;padding:11px;font-size:14px;border-radius:var(--radius-sm);margin-top:6px;font-family:inherit;}
+
+/* Toast */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:rgba(28,26,24,0.92);color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:100;}
+.nav-btn{flex:1;padding:10px 0 7px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-family:inherit;}
+.nav-btn.active{color:var(--accent);}
+.nav-icon{font-size:21px;line-height:1;}
+
+/* Filter chips */
+.filter-row{display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;flex-shrink:0;}
+.filter-chip{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;white-space:nowrap;}
+.filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* Empty */
+.empty{text-align:center;padding:50px 20px;color:var(--text3);}
+.empty .icon{font-size:44px;margin-bottom:10px;}
+.empty p{font-size:14px;line-height:1.7;}
+
+/* Export */
+.export-section{background:var(--surface);border-radius:var(--radius);padding:16px;margin:8px 0;box-shadow:var(--shadow);}
+.export-section p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:12px;}
+.export-btn{width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:inherit;margin-bottom:8px;}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);padding:12px 4px 5px;letter-spacing:0.5px;}
+
+  .header-banner {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.header-banner {
+  width: 100%;
+  overflow: hidden;
+}
+
+.header-banner img {
+  width: 100%;
+  height: 20vh; /* 根据屏幕高度 */
+  object-fit: cover;
+}
+
+.header-title {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+  
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+<div class="header-top">
+<!-- ✅ 放这里（header-top 外面） -->
+
+      <div class="header-banner">
+       <img src="https://picsum.photos/800/200">
+       <div class="header-title">🎨 美术班出勤 2026</div>
+    </div>
+      <button class="add-btn" onclick="openAddModal()">＋</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('students')">学生</button>
+      <button class="tab" onclick="switchTab('history')">日历记录</button>
+      <button class="tab" onclick="switchTab('export')">导出</button>
+    </div>
+  </header>
+
+  <div id="statsBar" class="stats-bar"></div>
+  <div id="searchRow" class="search-bar">
+    <input class="search-input" type="search" placeholder="🔍 搜索学生…" oninput="render()" id="searchInput"/>
+  </div>
+  <div id="filterRow" class="filter-row">
+    <button class="filter-chip active" onclick="setFilter('all',this)">全部</button>
+    <button class="filter-chip" onclick="setFilter('low',this)">课时不足</button>
+    <button class="filter-chip" onclick="setFilter('unpaid',this)">未缴费</button>
+  </div>
+
+  <div id="content" class="content"></div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('students')" id="nav-students"><span class="nav-icon">👥</span><span>学生</span></button>
+    <button class="nav-btn" onclick="switchTab('history')" id="nav-history"><span class="nav-icon">📅</span><span>日历</span></button>
+    <button class="nav-btn" onclick="switchTab('export')" id="nav-export"><span class="nav-icon">📤</span><span>导出</span></button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="modalTitle">添加学生</h2>
+    <div class="form-group"><label>学生姓名</label><input type="text" id="fName" placeholder="请输入姓名"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>总课时</label><input type="number" id="fTotal" placeholder="如 20" min="1"/></div>
+      <div class="form-group"><label>已上课次</label><input type="number" id="fAttended" placeholder="0" min="0"/></div>
+    </div>
+    <div class="form-group"><label>缴费状态</label>
+      <select id="fPaid"><option value="paid">已缴费</option><option value="unpaid">未缴费</option></select>
+    </div>
+    <div class="form-group"><label>备注（选填）</label><input type="text" id="fNote" placeholder="如：联系电话、上课时段…"/></div>
+    <div class="sheet-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveStudent()">保存</button>
+    </div>
+    <div id="deleteRow" style="display:none">
+      <button class="btn btn-danger" onclick="deleteStudent()">删除该学生</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+let currentYear = new Date().getFullYear();
+  
+<script>
+  
+function renderAll() {
+ renderAll();
+}
+  
+// ── 2026年所有周日 ──────────────────────────────
+const 
+
+  function getSundays(year) {
+  const sundays = [];
+  const d = new Date(year, 0, 1);
+
+  // 找到第一个周日
+  while (d.getDay() !== 0) {
+    d.setDate(d.getDate() + 1);
+  }
+
+  while (d.getFullYear() === year) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    sundays.push(`${y}-${m}-${day}`);
+
+    d.setDate(d.getDate() + 7);
+  }
+
+  return sundays;
+}
+  
+  = [
+  '2026-01-04','2026-01-11','2026-01-18','2026-01-25',
+  '2026-02-01','2026-02-08','2026-02-15','2026-02-22',
+  '2026-03-01','2026-03-08','2026-03-15','2026-03-22','2026-03-29',
+  '2026-04-05','2026-04-12','2026-04-19','2026-04-26',
+  '2026-05-03','2026-05-10','2026-05-17','2026-05-24','2026-05-31',
+  '2026-06-07','2026-06-14','2026-06-21','2026-06-28',
+  '2026-07-05','2026-07-12','2026-07-19','2026-07-26',
+  '2026-08-02','2026-08-09','2026-08-16','2026-08-23','2026-08-30',
+  '2026-09-06','2026-09-13','2026-09-20','2026-09-27',
+  '2026-10-04','2026-10-11','2026-10-18','2026-10-25',
+  '2026-11-01','2026-11-08','2026-11-15','2026-11-22','2026-11-29',
+  '2026-12-06','2026-12-13','2026-12-20','2026-12-27'
+];
+
+const MONTH_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+
+// key → month groups
+function groupByMonth(dates) {
+  const groups = {};
+  for (const d of dates) {
+    const m = d.slice(0,7);
+    if (!groups[m]) groups[m] = [];
+    groups[m].push(d);
+  }
+  return groups;
+}
+
+function getSundaysByMonth(year) {
+  return groupByMonth(getSundays(year));
+}
+
+// ── Storage ────────────────────────────────────
+const KEY = 'artclass2026_v3';
+const PHOTO_KEY = 'artclass2026_photos';
+let students = [], attendance = {}, photos = {}; // photos[sid] = base64 dataURL
+let editingId = null, currentTab = 'students', activeFilter = 'all';
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY)||'{}');
+    students = d.students || [];
+    const raw = d.attendance || {};
+    attendance = {};
+    for (const sid in raw) attendance[sid] = new Set(raw[sid]);
+    try { photos = JSON.parse(localStorage.getItem(PHOTO_KEY)||'{}'); } catch(e){ photos={}; }
+    if (!students.length) seed();
+  } catch(e) { seed(); }
+}
+
+function save() {
+  const att = {};
+  for (const sid in attendance) att[sid] = [...attendance[sid]];
+  localStorage.setItem(KEY, JSON.stringify({students, attendance: att}));
+}
+
+function savePhotos() {
+  try { localStorage.setItem(PHOTO_KEY, JSON.stringify(photos)); } catch(e) { showToast('⚠️ 照片存储空间不足'); }
+}
+
+function seed() {
+  students = [
+    {id:1, name:'小明', total:20, attended:0, paid:'paid', note:''},
+    {id:2, name:'小红', total:15, attended:0, paid:'paid', note:''},
+    {id:3, name:'小华', total:10, attended:0, paid:'unpaid', note:'138xxxx'},
+  ];
+  attendance = {1:new Set(), 2:new Set(), 3:new Set()};
+  
+}
+
+// ── Helpers ────────────────────────────────────
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getAtt(sid) { return attendance[sid] || new Set(); }
+
+function attendedCount(s) {
+  const manual = s.attended || 0;
+  return getAtt(s.id).size + manual;
+}
+
+function remain(s) { return Math.max(0, s.total - attendedCount(s)); }
+
+function statusInfo(s) {
+  const r = remain(s);
+  if (r <= 0) return {cls:'badge-danger', txt:'已结束'};
+  if (r <= 3) return {cls:'badge-warn', txt:`剩余${r}节`};
+  return {cls:'badge-ok', txt:`剩余${r}节`};
+}
+
+const AVA_COLORS = ['#c17f3e','#4a7c59','#7c5c4a','#3e6fa8','#7c4a6f','#4a7c7c','#7c4a4a','#5c7c4a'];
+function avaColor(name) { let h=0; for(let c of name) h+=c.charCodeAt(0); return AVA_COLORS[h%AVA_COLORS.length]; }
+
+function fmt(d) { // '2026-01-04' → '1/4'
+  const [,m,day] = d.split('-');
+  return `${+m}/${+day}`;
+}
+
+function avatarHTML(s) {
+  const photo = photos[s.id];
+  if (photo) {
+    return `<div class="avatar-wrap" onclick="triggerPhotoUpload(${s.id})">
+      <img class="avatar" src="${photo}" alt="${s.name}"/>
+      <div class="avatar-cam">📷</div>
+      <input class="photo-input" type="file" accept="image/*" id="photo-${s.id}" onchange="handlePhoto(event,${s.id})"/>
+    </div>`;
+  }
+  return `<div class="avatar-wrap" onclick="triggerPhotoUpload(${s.id})">
+    <div class="avatar" style="background:${avaColor(s.name)}">${s.name[0]}</div>
+    <div class="avatar-cam">📷</div>
+    <input class="photo-input" type="file" accept="image/*" id="photo-${s.id}" onchange="handlePhoto(event,${s.id})"/>
+  </div>`;
+}
+
+function triggerPhotoUpload(sid) {
+  const inp = document.getElementById(`photo-${sid}`);
+  if (inp) inp.click();
+}
+
+function handlePhoto(event, sid) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    // Compress image before saving
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 200;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > max) { h = h*(max/w); w = max; } }
+      else { if (h > max) { w = w*(max/h); h = max; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      photos[sid] = canvas.toDataURL('image/jpeg', 0.75);
+      savePhotos();
+      renderStudents();
+      showToast('✅ 头像已更新');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Render helpers ─────────────────────────────
+function renderStats() {
+  const total = students.length;
+  const todayStr = today();
+
+  function renderStats() {
+  const todayStr = today();
+
+  let total = students.length;
+  let todayChecked = 0;
+  let lowCount = 0;
+  let unpaid = 0;
+
+  for (const s of students) {
+    const r = remain(s);
+
+    if (getAtt(s.id).has(todayStr)) todayChecked++;
+    if (r > 0 && r <= 3) lowCount++;
+    if (s.paid === 'unpaid') unpaid++;
+  }
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div>
+    <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div>
+  `;
+}
+  
+  const lowCount = students.filter(s => { const r=remain(s); return r>0&&r<=3; }).length;
+  const unpaid = students.filter(s => s.paid==='unpaid').length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div>
+    <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div>
+  `;
+}
+
+// ── Student Tab ────────────────────────────────
+function renderStudents() {
+  const q = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+  let list = students.filter(s => !q || s.name.toLowerCase().includes(q));
+  if (activeFilter==='low') list = list.filter(s => { const r=remain(s); return r>0&&r<=3; });
+  if (activeFilter==='unpaid') list = list.filter(s => s.paid==='unpaid');
+  const todayStr = today();
+
+  if (!list.length) {
+    document.getElementById('content').innerHTML = `<div class="empty"><div class="icon">🎨</div><p>暂无学生记录<br>点右上角 ＋ 添加</p></div>`;
+    return;
+  }
+
+  document.getElementById('content').innerHTML = list.map(s => {
+    const att = getAtt(s.id);
+    const total_attended = attendedCount(s);
+    const pct = s.total>0 ? Math.round((total_attended/s.total)*100) : 0;
+    const st = statusInfo(s);
+    const paidBadge = s.paid==='paid'
+      ? '<span class="badge badge-paid">已缴费</span>'
+      : '<span class="badge badge-unpaid">未缴费</span>';
+
+    // Show only current month's sundays in card preview, rest collapsed
+    const nowMonth = todayStr.slice(0,7);
+    const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || [];
+
+    const dayCells = monthSundays.map(d => {
+      const isAtt = att.has(d);
+      const isToday = d === todayStr;
+      const isFuture = d > todayStr;
+      let cls = 'cal-day';
+      if (isAtt) cls += ' attended';
+      else if (isToday) cls += ' today-day';
+      else if (isFuture) cls += ' future-day';
+      else cls += ' skipped';
+      const clickable = !isFuture ? `onclick="toggleDay(${s.id},'${d}')"` : '';
+      return `<div class="${cls}" ${clickable}><div class="day-num">${fmt(d)}</div></div>`;
+    }).join('');
+
+    const monthLabel = MONTH_NAMES[+nowMonth.slice(5)-1];
+
+    return `
+    <div class="student-card" id="card-${s.id}">
+      <div class="card-header">
+        ${avatarHTML(s)}
+        <div class="card-info">
+          <div class="card-name">${s.name}</div>
+          <div class="card-meta">${s.note||'已上'+total_attended+'节'}</div>
+        </div>
+        <div class="card-badges">
+          <span class="badge ${st.cls}">${st.txt}</span>
+          ${paidBadge}
+        </div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <span class="prog-text">${total_attended}/${s.total}节</span>
+      </div>
+      <div class="cal-wrapper">
+        <div class="cal-month-label">${monthLabel}的课程</div>
+        <div class="cal-days">${dayCells}</div>
+      </div>
+      <div class="card-toggle" onclick="toggleFullCal(${s.id})">
+        <span id="toggle-label-${s.id}">▼ 查看全年日历</span>
+      </div>
+      <div id="fullcal-${s.id}" style="display:none">
+        ${renderFullCal(s.id, att)}
+      </div>
+      lex;gap:8px;padding:0 14px 13px;">
+        <button class="btn btn-cancel" style="flex:1;padding:9px;font-size:13px;border-radius:var(--radius-sm)" onclick="openEditModal(${s.id})">编辑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFullCal(sid, att) {
+  const todayStr = today();
+  return Object.entries(getSundaysByMonth(currentYear)).map(([month, days]) => {
+    const label = MONTH_NAMES[+month.slice(5)-1];
+    const cells = days.map(d => {
+      const isAtt = att.has(d);
+      const isFuture = d > todayStr;
+      const isToday = d === todayStr;
+      let cls = 'cal-day';
+      if (isAtt) cls += ' attended';
+      else if (isToday) cls += ' today-day';
+      else if (isFuture) cls += ' future-day';
+      else cls += ' skipped';
+      const clickable = !isFuture ? `onclick="toggleDay(${sid},'${d}')"` : '';
+      return `<div class="${cls}" ${clickable}><div class="day-num">${fmt(d)}</div></div>`;
+    }).join('');
+    return `<div class="cal-month-group" style="padding:0 14px 4px">
+      <div class="cal-month-label">${label}</div>
+      <div class="cal-days">${cells}</div>
+    </div>`;
+  }).join('');
+}
+
+let expandedCards = new Set();
+function toggleFullCal(sid) {
+  const el = document.getElementById(`fullcal-${sid}`);
+  const lbl = document.getElementById(`toggle-label-${sid}`);
+  if (!el) return;
+  if (expandedCards.has(sid)) {
+    el.style.display = 'none';
+    lbl.textContent = '▼ 查看全年日历';
+    expandedCards.delete(sid);
+  } else {
+    el.style.display = 'block';
+    lbl.textContent = '▲ 收起';
+    expandedCards.add(sid);
+  }
+}
+
+function toggleDay(sid, date) {
+  const s = students.find(x => x.id === sid);
+  if (!s) return;
+  if (!attendance[sid]) attendance[sid] = new Set();
+  const att = attendance[sid];
+  if (att.has(date)) {
+    att.delete(date);
+    showToast(`${s.name} 取消 ${fmt(date)} 的出勤`);
+  } else {
+    if (attendedCount(s) >= s.total) {
+      showToast(`⚠️ ${s.name} 课时已用完，请先续课`); return;
+    }
+    att.add(date);
+    showToast(`✅ ${s.name} ${fmt(date)} 出勤已记录`);
+  }
+  
+  renderAll();
+}
+
+// ── History Tab ────────────────────────────────
+function renderHistory() {
+  const content = document.getElementById('content');
+  // Collect all attended dates across all students
+  const allRecords = [];
+  for (const s of students) {
+    const att = getAtt(s.id);
+    for (const d of att) allRecords.push({date:d, student:s});
+  }
+  if (!allRecords.length) {
+    content.innerHTML = `<div class="empty"><div class="icon">📅</div><p>暂无出勤记录<br>在学生页点击日期打卡</p></div>`;
+    return;
+  }
+  allRecords.sort((a,b) => b.date.localeCompare(a.date));
+  const groups = {};
+  for (const r of allRecords) {
+    if (!groups[r.date]) groups[r.date] = [];
+    groups[r.date].push(r);
+  }
+  const todayStr = today();
+  content.innerHTML = Object.entries(groups).map(([date, recs]) => {
+    const label = date===todayStr ? `今天 ${date}` : date;
+    const items = recs.map(r => `
+      <div class="history-item">
+        <div>
+          <div class="history-name">${r.student.name}</div>
+          <div class="history-sub">已上${attendedCount(r.student)}节 · 剩余${remain(r.student)}节</div>
+        </div>
+        <span style="font-size:20px">✅</span>
+      </div>`).join('');
+    return `<div class="date-group"><div class="date-label">📅 ${label}（${recs.length}人出勤）</div>${items}</div>`;
+  }).join('');
+}
+
+// ── Export Tab ─────────────────────────────────
+function renderExport() {
+  document.getElementById('content').innerHTML = `
+    <div class="export-section">
+      <p>导出所有学生的出勤报告，可复制后发送给家长或粘贴到微信。</p>
+      <button class="export-btn" onclick="doExport()">📋 复制出勤报告</button>
+    </div>
+    <div class="section-title">学生列表一览</div>
+    ${students.map(s => {
+      const r = remain(s);
+      const cnt = attendedCount(s);
+      const st = statusInfo(s);
+      return `<div class="history-item" style="border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:6px">
+        <div>
+          <div class="history-name">${s.name}</div>
+          <div class="history-sub">已上${cnt}节 · 剩余${r}节 · ${s.paid==='paid'?'已缴费':'未缴费'}</div>
+        </div>
+        <span class="badge ${st.cls}">${st.txt}</span>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function doExport() {
+  const d = new Date().toLocaleDateString('zh-CN');
+  let txt = `🎨 美术班出勤报告 ${d}\n${'─'.repeat(26)}\n`;
+  for (const s of students) {
+    const cnt = attendedCount(s);
+    const att = [...getAtt(s.id)].sort();
+    txt += `\n👤 ${s.name}\n`;
+    txt += `   课时：${cnt}/${s.total}节，剩余 ${remain(s)} 节\n`;
+    txt += `   缴费：${s.paid==='paid'?'✅ 已缴费':'❌ 未缴费'}\n`;
+    if (s.note) txt += `   备注：${s.note}\n`;
+    if (att.length) txt += `   出勤日期：${att.map(fmt).join('、')}\n`;
+  }
+  txt += `\n${'─'.repeat(26)}\n共 ${students.length} 名学生`;
+  navigator.clipboard.writeText(txt)
+    .then(() => showToast('✅ 已复制到剪贴板'))
+    .catch(() => prompt('请手动复制：', txt));
+}
+
+// ── Tab / Filter ───────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['students','history','export'][i]===tab));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`nav-${tab}`)?.classList.add('active');
+  const showSearch = tab==='students';
+  document.getElementById('searchRow').style.display = showSearch?'block':'none';
+  document.getElementById('filterRow').style.display = showSearch?'flex':'none';
+  renderStats();
+  if (tab==='students') renderStudents();
+  else if (tab==='history') renderHistory();
+  else renderExport();
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderStudents();
+}
+
+// ── Modal ──────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = '添加学生';
+  document.getElementById('fName').value='';
+  document.getElementById('fTotal').value='';
+  document.getElementById('fAttended').value='0';
+  document.getElementById('fPaid').value='paid';
+  document.getElementById('fNote').value='';
+  document.getElementById('deleteRow').style.display='none';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('fName').focus(), 300);
+}
+
+function openEditModal(id) {
+  const s = students.find(x=>x.id===id);
+  if (!s) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = '编辑学生';
+  document.getElementById('fName').value = s.name;
+  document.getElementById('fTotal').value = s.total;
+  document.getElementById('fAttended').value = s.attended||0;
+  document.getElementById('fPaid').value = s.paid||'paid';
+  document.getElementById('fNote').value = s.note||'';
+  document.getElementById('deleteRow').style.display='block';
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingId = null;
+}
+
+function saveStudent() {
+  const name = document.getElementById('fName').value.trim();
+  const total = parseInt(document.getElementById('fTotal').value);
+  const attended = parseInt(document.getElementById('fAttended').value)||0;
+  const paid = document.getElementById('fPaid').value;
+  const note = document.getElementById('fNote').value.trim();
+  if (!name) { showToast('请填写学生姓名'); return; }
+  if (!total||total<1) { showToast('请填写有效课时数'); return; }
+  if (editingId) {
+    const s = students.find(x=>x.id===editingId);
+    Object.assign(s, {name, total, attended, paid, note});
+  } else {
+    const id = crypto.randomUUID();
+    students.push({id, name, total, attended, paid, note});
+    attendance[id] = new Set();
+  }
+   closeModal(); renderStats();
+  if (currentTab==='students') renderStudents();
+  showToast(editingId ? '✅ 已更新' : `✅ 已添加 ${name}`);
+}
+
+function deleteStudent() {
+  if (!editingId) return;
+  const s = students.find(x=>x.id===editingId);
+  if (!confirm(`确定删除 ${s?.name} 的全部记录吗？`)) return;
+  students = students.filter(x=>x.id!==editingId);
+  delete attendance[editingId];
+  delete photos[editingId];
+   savePhotos(); closeModal(); renderAll();
+  showToast('已删除');
+}
+
+function render() { if(currentTab==='students') renderStudents(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ── Init ───────────────────────────────────────
+load(); renderAll();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  databaseURL: "https://art-class-1108b-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ✅ 防循环锁
+let isSyncing = false;
+
+// ✅ 时间戳（防覆盖）
+let lastUpdate = 0;
+
+// ✅ Set → Array（存云）
+function serializeAttendance() {
+  const result = {};
+  for (const sid in attendance) {
+    result[sid] = [...attendance[sid]];
+  }
+  return result;
+}
+
+// ✅ Array → Set（读云）
+function deserializeAttendance(raw) {
+  const result = {};
+  for (const sid in raw) {
+    result[sid] = new Set(raw[sid]);
+  }
+  return result;
+}
+
+// ✅ 云保存
+function saveToCloud() {
+  set(ref(db, 'data'), {
+    students: students,
+    photos: photos,
+    attendance: serializeAttendance(),
+    updatedAt: Date.now()
+  });
+}
+
+// ✅ 云读取
+function loadFromCloud(callback) {
+  onValue(ref(db, 'data'), (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    // 防止旧数据覆盖新数据
+    if (data.updatedAt && data.updatedAt < lastUpdate) return;
+
+    isSyncing = true;
+    lastUpdate = data.updatedAt || Date.now();
+
+    callback(data);
+
+    isSyncing = false;
+  });
+}
+
+// ✅ 重写 save（带锁）
+const originalSave = save;
+
+  save = function() {
+  if (isSyncing) return;
+
+  originalSave();
+
+  clearTimeout(window._cloudTimer);
+  window._cloudTimer = setTimeout(() => {
+    saveToCloud();
+  }, 300);
+};
+
+// ✅ 页面加载同步
+loadFromCloud((cloudData)=>{
+  students = cloudData.students || [];
+  photos = cloudData.photos || {};
+  attendance = deserializeAttendance(cloudData.attendance || {});
+
+  renderStats();
+  renderStudents();
+});
+</script>
+
+</body>
+</html>
