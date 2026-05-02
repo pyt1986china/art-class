@@ -23,7 +23,7 @@
   --shadow:0 2px 12px rgba(0,0,0,0.07);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:auto;}
+html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 
 /* Header */
@@ -186,9 +186,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 <body>
 <div id="app">
   <header>
-<div class="header-top">
-<!-- ✅ 放这里（header-top 外面） -->
-
+    <div class="header-top">
       <div class="header-banner">
        <img src="https://picsum.photos/800/200">
        <div class="header-title">🎨 美术班出勤 2026</div>
@@ -247,39 +245,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 
 <div class="toast" id="toast"></div>
 
-let currentYear = new Date().getFullYear();
-  
 <script>
-  
-function renderAll() {
- renderAll();
-}
-  
 // ── 2026年所有周日 ──────────────────────────────
-const 
-
-  function getSundays(year) {
-  const sundays = [];
-  const d = new Date(year, 0, 1);
-
-  // 找到第一个周日
-  while (d.getDay() !== 0) {
-    d.setDate(d.getDate() + 1);
-  }
-
-  while (d.getFullYear() === year) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    sundays.push(`${y}-${m}-${day}`);
-
-    d.setDate(d.getDate() + 7);
-  }
-
-  return sundays;
-}
-  
-  = [
+const SUNDAYS_2026 = [
   '2026-01-04','2026-01-11','2026-01-18','2026-01-25',
   '2026-02-01','2026-02-08','2026-02-15','2026-02-22',
   '2026-03-01','2026-03-08','2026-03-15','2026-03-22','2026-03-29',
@@ -306,10 +274,7 @@ function groupByMonth(dates) {
   }
   return groups;
 }
-
-function getSundaysByMonth(year) {
-  return groupByMonth(getSundays(year));
-}
+const SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_2026);
 
 // ── Storage ────────────────────────────────────
 const KEY = 'artclass2026_v3';
@@ -346,14 +311,11 @@ function seed() {
     {id:3, name:'小华', total:10, attended:0, paid:'unpaid', note:'138xxxx'},
   ];
   attendance = {1:new Set(), 2:new Set(), 3:new Set()};
-  
+  save();
 }
 
 // ── Helpers ────────────────────────────────────
-function today() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
+function today() { return new Date().toISOString().slice(0,10); }
 
 function getAtt(sid) { return attendance[sid] || new Set(); }
 
@@ -429,31 +391,7 @@ function handlePhoto(event, sid) {
 function renderStats() {
   const total = students.length;
   const todayStr = today();
-
-  function renderStats() {
-  const todayStr = today();
-
-  let total = students.length;
-  let todayChecked = 0;
-  let lowCount = 0;
-  let unpaid = 0;
-
-  for (const s of students) {
-    const r = remain(s);
-
-    if (getAtt(s.id).has(todayStr)) todayChecked++;
-    if (r > 0 && r <= 3) lowCount++;
-    if (s.paid === 'unpaid') unpaid++;
-  }
-
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div>
-    <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div>
-    <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div>
-    <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div>
-  `;
-}
-  
+  const todayChecked = students.filter(s => getAtt(s.id).has(todayStr)).length;
   const lowCount = students.filter(s => { const r=remain(s); return r>0&&r<=3; }).length;
   const unpaid = students.filter(s => s.paid==='unpaid').length;
   document.getElementById('statsBar').innerHTML = `
@@ -467,7 +405,7 @@ function renderStats() {
 // ── Student Tab ────────────────────────────────
 function renderStudents() {
   const q = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
-  let list = students.filter(s => !q || s.name.toLowerCase().includes(q));
+  let list = students.filter(s => !q || s.name.includes(q));
   if (activeFilter==='low') list = list.filter(s => { const r=remain(s); return r>0&&r<=3; });
   if (activeFilter==='unpaid') list = list.filter(s => s.paid==='unpaid');
   const todayStr = today();
@@ -488,7 +426,7 @@ function renderStudents() {
 
     // Show only current month's sundays in card preview, rest collapsed
     const nowMonth = todayStr.slice(0,7);
-    const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || [];
+    const monthSundays = SUNDAYS_BY_MONTH[nowMonth] || [];
 
     const dayCells = monthSundays.map(d => {
       const isAtt = att.has(d);
@@ -532,7 +470,7 @@ function renderStudents() {
       <div id="fullcal-${s.id}" style="display:none">
         ${renderFullCal(s.id, att)}
       </div>
-      lex;gap:8px;padding:0 14px 13px;">
+      <div style="display:flex;gap:8px;padding:0 14px 13px;">
         <button class="btn btn-cancel" style="flex:1;padding:9px;font-size:13px;border-radius:var(--radius-sm)" onclick="openEditModal(${s.id})">编辑</button>
       </div>
     </div>`;
@@ -541,7 +479,7 @@ function renderStudents() {
 
 function renderFullCal(sid, att) {
   const todayStr = today();
-  return Object.entries(getSundaysByMonth(currentYear)).map(([month, days]) => {
+  return Object.entries(SUNDAYS_BY_MONTH).map(([month, days]) => {
     const label = MONTH_NAMES[+month.slice(5)-1];
     const cells = days.map(d => {
       const isAtt = att.has(d);
@@ -593,8 +531,9 @@ function toggleDay(sid, date) {
     att.add(date);
     showToast(`✅ ${s.name} ${fmt(date)} 出勤已记录`);
   }
-  
-  renderAll();
+  save();
+  renderStats();
+  renderStudents();
 }
 
 // ── History Tab ────────────────────────────────
@@ -739,11 +678,11 @@ function saveStudent() {
     const s = students.find(x=>x.id===editingId);
     Object.assign(s, {name, total, attended, paid, note});
   } else {
-    const id = crypto.randomUUID();
+    const id = Date.now();
     students.push({id, name, total, attended, paid, note});
     attendance[id] = new Set();
   }
-   closeModal(); renderStats();
+  save(); closeModal(); renderStats();
   if (currentTab==='students') renderStudents();
   showToast(editingId ? '✅ 已更新' : `✅ 已添加 ${name}`);
 }
@@ -755,7 +694,7 @@ function deleteStudent() {
   students = students.filter(x=>x.id!==editingId);
   delete attendance[editingId];
   delete photos[editingId];
-   savePhotos(); closeModal(); renderAll();
+  save(); savePhotos(); closeModal(); renderStats(); renderStudents();
   showToast('已删除');
 }
 
@@ -768,9 +707,9 @@ function showToast(msg) {
 }
 
 // ── Init ───────────────────────────────────────
-load(); renderAll();
+load(); renderStats(); renderStudents();
 </script>
-<script type="module">
+  <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -781,82 +720,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ✅ 防循环锁
-let isSyncing = false;
-
-// ✅ 时间戳（防覆盖）
-let lastUpdate = 0;
-
-// ✅ Set → Array（存云）
-function serializeAttendance() {
-  const result = {};
-  for (const sid in attendance) {
-    result[sid] = [...attendance[sid]];
-  }
-  return result;
-}
-
-// ✅ Array → Set（读云）
-function deserializeAttendance(raw) {
-  const result = {};
-  for (const sid in raw) {
-    result[sid] = new Set(raw[sid]);
-  }
-  return result;
-}
-
-// ✅ 云保存
+// 云保存
 function saveToCloud() {
   set(ref(db, 'data'), {
     students: students,
     photos: photos,
-    attendance: serializeAttendance(),
-    updatedAt: Date.now()
+    attendance: attendance
   });
 }
 
-// ✅ 云读取
+// 云读取
 function loadFromCloud(callback) {
   onValue(ref(db, 'data'), (snapshot) => {
     const data = snapshot.val();
-    if (!data) return;
-
-    // 防止旧数据覆盖新数据
-    if (data.updatedAt && data.updatedAt < lastUpdate) return;
-
-    isSyncing = true;
-    lastUpdate = data.updatedAt || Date.now();
-
-    callback(data);
-
-    isSyncing = false;
+    if (data) callback(data);
   });
 }
 
-// ✅ 重写 save（带锁）
+// 替换原保存
 const originalSave = save;
-
-  save = function() {
-  if (isSyncing) return;
-
+save = function() {
   originalSave();
-
-  clearTimeout(window._cloudTimer);
-  window._cloudTimer = setTimeout(() => {
-    saveToCloud();
-  }, 300);
+  saveToCloud();
 };
 
-// ✅ 页面加载同步
+// 页面加载同步
+
 loadFromCloud((cloudData)=>{
+  if (!cloudData) return;
+
   students = cloudData.students || [];
   photos = cloudData.photos || {};
-  attendance = deserializeAttendance(cloudData.attendance || {});
+  attendance = cloudData.attendance || {};
 
-  renderStats();
   renderStudents();
 });
-</script>
 
+</script>
 </body>
 </html>
