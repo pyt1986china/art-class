@@ -186,7 +186,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 <body>
 <div id="app">
   <header>
-    <div class="header-top">
+<div class="header-top">
+<!-- ✅ 放这里（header-top 外面） -->
+
       <div class="header-banner">
        <img src="https://picsum.photos/800/200">
        <div class="header-title">🎨 美术班出勤 2026</div>
@@ -245,6 +247,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 
 <div class="toast" id="toast"></div>
 
+let currentYear = new Date().getFullYear();
+  
 <script>
   
 function renderAll() {
@@ -252,7 +256,30 @@ function renderAll() {
 }
   
 // ── 2026年所有周日 ──────────────────────────────
-const SUNDAYS_2026 = [
+const 
+
+  function getSundays(year) {
+  const sundays = [];
+  const d = new Date(year, 0, 1);
+
+  // 找到第一个周日
+  while (d.getDay() !== 0) {
+    d.setDate(d.getDate() + 1);
+  }
+
+  while (d.getFullYear() === year) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    sundays.push(`${y}-${m}-${day}`);
+
+    d.setDate(d.getDate() + 7);
+  }
+
+  return sundays;
+}
+  
+  = [
   '2026-01-04','2026-01-11','2026-01-18','2026-01-25',
   '2026-02-01','2026-02-08','2026-02-15','2026-02-22',
   '2026-03-01','2026-03-08','2026-03-15','2026-03-22','2026-03-29',
@@ -279,7 +306,10 @@ function groupByMonth(dates) {
   }
   return groups;
 }
-const SUNDAYS_BY_MONTH = groupByMonth(SUNDAYS_2026);
+
+function getSundaysByMonth(year) {
+  return groupByMonth(getSundays(year));
+}
 
 // ── Storage ────────────────────────────────────
 const KEY = 'artclass2026_v3';
@@ -458,7 +488,7 @@ function renderStudents() {
 
     // Show only current month's sundays in card preview, rest collapsed
     const nowMonth = todayStr.slice(0,7);
-    const monthSundays = SUNDAYS_BY_MONTH[nowMonth] || [];
+    const monthSundays = getSundaysByMonth(currentYear)[nowMonth] || [];
 
     const dayCells = monthSundays.map(d => {
       const isAtt = att.has(d);
@@ -502,7 +532,7 @@ function renderStudents() {
       <div id="fullcal-${s.id}" style="display:none">
         ${renderFullCal(s.id, att)}
       </div>
-      <div style="display:flex;gap:8px;padding:0 14px 13px;">
+      lex;gap:8px;padding:0 14px 13px;">
         <button class="btn btn-cancel" style="flex:1;padding:9px;font-size:13px;border-radius:var(--radius-sm)" onclick="openEditModal(${s.id})">编辑</button>
       </div>
     </div>`;
@@ -511,7 +541,7 @@ function renderStudents() {
 
 function renderFullCal(sid, att) {
   const todayStr = today();
-  return Object.entries(SUNDAYS_BY_MONTH).map(([month, days]) => {
+  return Object.entries(getSundaysByMonth(currentYear)).map(([month, days]) => {
     const label = MONTH_NAMES[+month.slice(5)-1];
     const cells = days.map(d => {
       const isAtt = att.has(d);
