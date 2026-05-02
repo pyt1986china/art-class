@@ -246,6 +246,11 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 <div class="toast" id="toast"></div>
 
 <script>
+  
+function renderAll() {
+ renderAll();
+}
+  
 // ── 2026年所有周日 ──────────────────────────────
 const SUNDAYS_2026 = [
   '2026-01-04','2026-01-11','2026-01-18','2026-01-25',
@@ -311,7 +316,7 @@ function seed() {
     {id:3, name:'小华', total:10, attended:0, paid:'unpaid', note:'138xxxx'},
   ];
   attendance = {1:new Set(), 2:new Set(), 3:new Set()};
-  save();
+  
 }
 
 // ── Helpers ────────────────────────────────────
@@ -394,7 +399,31 @@ function handlePhoto(event, sid) {
 function renderStats() {
   const total = students.length;
   const todayStr = today();
-  const todayChecked = students.filter(s => getAtt(s.id).has(todayStr)).length;
+
+  function renderStats() {
+  const todayStr = today();
+
+  let total = students.length;
+  let todayChecked = 0;
+  let lowCount = 0;
+  let unpaid = 0;
+
+  for (const s of students) {
+    const r = remain(s);
+
+    if (getAtt(s.id).has(todayStr)) todayChecked++;
+    if (r > 0 && r <= 3) lowCount++;
+    if (s.paid === 'unpaid') unpaid++;
+  }
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><div class="n">${total}</div><div class="l">学生总数</div></div>
+    <div class="stat-pill"><div class="n">${todayChecked}</div><div class="l">今日签到</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--amber)">${lowCount}</div><div class="l">课时不足</div></div>
+    <div class="stat-pill"><div class="n" style="color:var(--red)">${unpaid}</div><div class="l">未缴费</div></div>
+  `;
+}
+  
   const lowCount = students.filter(s => { const r=remain(s); return r>0&&r<=3; }).length;
   const unpaid = students.filter(s => s.paid==='unpaid').length;
   document.getElementById('statsBar').innerHTML = `
@@ -534,9 +563,8 @@ function toggleDay(sid, date) {
     att.add(date);
     showToast(`✅ ${s.name} ${fmt(date)} 出勤已记录`);
   }
-  save();
-  renderStats();
-  renderStudents();
+  
+  renderAll();
 }
 
 // ── History Tab ────────────────────────────────
@@ -685,7 +713,7 @@ function saveStudent() {
     students.push({id, name, total, attended, paid, note});
     attendance[id] = new Set();
   }
-  save(); closeModal(); renderStats();
+   closeModal(); renderStats();
   if (currentTab==='students') renderStudents();
   showToast(editingId ? '✅ 已更新' : `✅ 已添加 ${name}`);
 }
@@ -697,7 +725,7 @@ function deleteStudent() {
   students = students.filter(x=>x.id!==editingId);
   delete attendance[editingId];
   delete photos[editingId];
-  save(); savePhotos(); closeModal(); renderAll();
+   savePhotos(); closeModal(); renderAll();
   showToast('已删除');
 }
 
@@ -777,10 +805,16 @@ function loadFromCloud(callback) {
 
 // ✅ 重写 save（带锁）
 const originalSave = save;
-save = function() {
+
+  save = function() {
   if (isSyncing) return;
+
   originalSave();
-  saveToCloud();
+
+  clearTimeout(window._cloudTimer);
+  window._cloudTimer = setTimeout(() => {
+    saveToCloud();
+  }, 300);
 };
 
 // ✅ 页面加载同步
