@@ -697,7 +697,7 @@ function deleteStudent() {
   students = students.filter(x=>x.id!==editingId);
   delete attendance[editingId];
   delete photos[editingId];
-  save(); savePhotos(); closeModal(); renderStats(); renderStudents();
+  save(); savePhotos(); closeModal(); renderAll();
   showToast('已删除');
 }
 
@@ -710,7 +710,7 @@ function showToast(msg) {
 }
 
 // ── Init ───────────────────────────────────────
-load(); renderStats(); renderStudents();
+load(); renderAll();
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
